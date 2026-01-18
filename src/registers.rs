@@ -46,7 +46,7 @@ impl Registers {
         self.e = (value & 0xFF) as u8;
     }
 
-    fn set_fl(&mut self, value: u16) {
+    fn set_hl(&mut self, value: u16) {
         self.h = ((value & 0xFF00) >> 8) as u8;
         self.l = (value & 0xFF) as u8;
     }
