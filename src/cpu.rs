@@ -17,16 +17,21 @@ impl MemoryBus {
 impl CPU {
     fn step(&mut self) {
         let mut instruction_byte = self.bus.read_byte(self.pc);
+        let prefixed = instruction_byte == 0xCB;
+        if prefixed {
+            instruction_byte = self.bus.read_byte(self.pc + 1);
+        }
 
-        let next_pc = if let SOme(instruction) = Instruction::from_byte(instruction_byte) {
+        let next_pc = if let Some(instruction) = Instruction::from_byte(instruction_byte, prefixed) {
             self.execute(instruction)
         } else {
-            panic!("Unknown instruction found for: 0x{:x}", instruction_byte);
+            let description = format!("0x{}{:x}", if prefixed { "cb" } else { "" }, instruction_byte);
+            panic!("Unknown instruction found for: 0x{:x}", description)
         };
         self.pc = next_pc;
     }
 
-    fn execute(&mut self, instructon: Instruction) -> u16 {
+    fn execute(&mut self, Instruction: Instruction) -> u16 {
         match instruction {
             Instruction::ADD(target) => {
                 match target {
@@ -123,7 +128,7 @@ impl CPU {
                     _ => { /* TODO: support more targets */ self.pc }
                 }
             }
-            Instructon::ADC(target) => {
+            Instruction::ADC(target) => {
                 match target {
                     ArithmeticTarget::A => {
                         let value = self.registers.a;
